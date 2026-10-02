@@ -21,6 +21,14 @@ class UserSchema(BaseModel):
     class Config:
         orm_mode = True
 
+# what other people see about a user (no email)
+class UserPublicSchema(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        orm_mode = True
+
 class UserTokenSchema(BaseModel):
     token: str
     message: str
