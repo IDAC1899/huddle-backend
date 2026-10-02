@@ -1,8 +1,7 @@
 from .base import BaseModel
 
-# Import submodules so their classes register with the mapper registry.
-# Import modules, not classes, to avoid circular imports between request/property/notification.
+# import the modules (not the classes) so every model registers with Base
 from . import user
-# add future models here as needed
+from . import event
 
 __all__ = ["BaseModel"]
