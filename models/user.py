@@ -17,6 +17,9 @@ class UserModel(BaseModel):
     email = Column(String, unique=True)  # Each email must be unique
     password = Column(String, nullable=True)
 
+    # one user hosts many events
+    events = relationship("EventModel", back_populates="user")
+
     def set_password(self, plain_txt_password: str):
         self.password = pwd_context.hash(plain_txt_password)
 
@@ -28,6 +31,8 @@ class UserModel(BaseModel):
         "exp": datetime.now(timezone.utc) + timedelta(days=1),  # Expiration time (1 day)
         "iat": datetime.now(timezone.utc),  # Issued at time
         "sub": str(self.id),  # Subject - the user ID
+        # so the front end can show who is signed in
+        "username": self.username,
         }
 
         token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
