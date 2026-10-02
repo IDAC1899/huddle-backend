@@ -17,3 +17,6 @@ class EventModel(BaseModel):
     # the user who is hosting the event
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("UserModel", back_populates="events")
+
+    # deleting an event also deletes its rsvps
+    rsvps = relationship("RsvpModel", back_populates="event", cascade="all, delete-orphan")
