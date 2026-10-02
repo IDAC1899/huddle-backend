@@ -20,6 +20,9 @@ class UserModel(BaseModel):
     # one user hosts many events
     events = relationship("EventModel", back_populates="user")
 
+    # one user has many rsvps
+    rsvps = relationship("RsvpModel", back_populates="user")
+
     def set_password(self, plain_txt_password: str):
         self.password = pwd_context.hash(plain_txt_password)
 
