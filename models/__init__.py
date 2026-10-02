@@ -4,5 +4,6 @@ from .base import BaseModel
 from . import user
 from . import event
 from . import rsvp
+from . import comment
 
 __all__ = ["BaseModel"]
