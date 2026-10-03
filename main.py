@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 # Controllers
 from controllers.users import router as UsersRouter
+from controllers.events import router as EventsRouter
 
 
 app = FastAPI()
@@ -27,9 +28,8 @@ app.add_middleware(
 )
 
 app.include_router(UsersRouter, prefix='/api')
+app.include_router(EventsRouter, prefix='/api')
 
 @app.get('/health')
 def health_check():
   return {'message': 'Api is running'}
-
-
