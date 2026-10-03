@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from controllers.users import router as UsersRouter
 from controllers.events import router as EventsRouter
 from controllers.rsvps import router as RsvpsRouter
+from controllers.comments import router as CommentsRouter
 
 
 app = FastAPI()
@@ -31,6 +32,7 @@ app.add_middleware(
 app.include_router(UsersRouter, prefix='/api')
 app.include_router(EventsRouter, prefix='/api')
 app.include_router(RsvpsRouter, prefix='/api')
+app.include_router(CommentsRouter, prefix='/api')
 
 @app.get('/health')
 def health_check():
