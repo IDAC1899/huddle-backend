@@ -1,185 +1,116 @@
-# Python FastAPI Authorization Solution
+# Huddle API
 
-In this app we have setup the JWT authentication for a simple boilerplate application. We have 2 simple models + a user model and respective controllers with serializers to use as a jump off point. We have also included alembic for database migration, with the initial migration already setup to migrate the user model.
+Huddle is a local events board for Bahrain. Users can post events like a 5-a-side game, a study session or a board games night, RSVP as going or maybe, and chat in the comments. Events have a capacity, so once they're full no one else can RSVP as going.
 
-Once this base project is setup, please review and follow the post install documentation:
-> [Managing Migrations](https://github.com/Dujota/FastAPI-SQLAlchemy-Migrations-Guide)
->
-> [Setting up CORS for FastAPI](https://github.com/Dujota/FastAPI-CORS-Guide)
->
-> [Deploying to Render](TBD)
+This repo is the back end. The front end lives here: [huddle-frontend](https://github.com/IDAC1899/huddle-frontend)
+
+## Technologies Used
+
+- Python 3.14
+- FastAPI
+- SQLAlchemy and PostgreSQL
+- Alembic (migrations)
+- Pydantic (serializers)
+- PyJWT and passlib/bcrypt (auth)
+- Pytest
+
+## ERD
+
+<img src="assets/huddle-erd.png" alt="Huddle ERD" width="75%">
+
+- A user hosts many events, makes many RSVPs and writes many comments
+- An event has many RSVPs and many comments
+- Deleting an event also deletes its RSVPs and comments
+
+## Routes
+
+All routes start with `/api`.
+
+| Method | Route | Auth | What it does |
+|---|---|---|---|
+| POST | `/register` | - | Create an account |
+| POST | `/login` | - | Log in and get a token |
+| GET | `/current_user` | Logged in | Get the signed-in user |
+| GET | `/events` | - | All events, soonest first |
+| GET | `/events/{id}` | - | One event with its host, RSVPs and comments |
+| POST | `/events` | Logged in | Host a new event |
+| PUT | `/events/{id}` | Host only | Edit an event |
+| DELETE | `/events/{id}` | Host only | Delete an event (and its RSVPs and comments) |
+| GET | `/my-events` | Logged in | Events you're hosting and attending |
+| POST | `/events/{id}/rsvps` | Logged in | RSVP as going or maybe |
+| PUT | `/rsvps/{id}` | Owner only | Switch between going and maybe |
+| DELETE | `/rsvps/{id}` | Owner only | Cancel an RSVP |
+| GET | `/events/{id}/comments` | - | Comments on an event |
+| GET | `/comments/{id}` | - | One comment |
+| POST | `/events/{id}/comments` | Logged in | Comment on an event |
+| PUT | `/comments/{id}` | Owner only | Edit a comment |
+| DELETE | `/comments/{id}` | Owner only | Delete a comment |
+
+### RSVP rules
+
+- One RSVP per user per event (409 if you try again)
+- You can't RSVP as going when the event is full (400)
+- Switching from maybe to going checks capacity again
+- RSVPing as maybe doesn't take a spot
+
+## Planning
+
+### Wireframes
+
+**Events list**
+
+<img src="assets/huddle-wireframe-1-events-list.png" alt="Events list wireframe" width="50%">
+
+**Event details**
+
+<img src="assets/huddle-wireframe-2-event-details.png" alt="Event details wireframe" width="50%">
+
+**New / edit event**
+
+<img src="assets/huddle-wireframe-3-event-form.png" alt="Event form wireframe" width="50%">
+
+**My events**
+
+<img src="assets/huddle-wireframe-4-my-events.png" alt="My events wireframe" width="50%">
+
+**Sign up / Sign in**
+
+<img src="assets/huddle-wireframe-5-sign-in.png" alt="Sign in wireframe" width="50%">
+
+### Component Hierarchy
+
+<img src="assets/huddle-component-hierarchy.png" alt="Huddle component hierarchy" width="75%">
 
 ## Getting Started
 
-## Cloning the Auth boilerplate
-
-Clone this repo down to your machine so you can start the setup stage for your new project:
-
+1. Clone the repo and install packages:
 ```bash
-git clone https://github.com/Bahrain-SEB-15/FastAPI-JWT-Template.git
+   pipenv install --dev
 ```
-
-Once we have the repository on our machines, we can change the name of the directory to your new project name`:
-
+2. Create the database:
 ```bash
-mv FastAPI-JWT-Template <YOUR_APP_NAME>
+   createdb huddle_db
 ```
-
-Next, `cd` into your renamed directory:
-
+3. Create a `.env` file in the root:
+```
+   DATABASE_URL=postgresql+psycopg2://<your-username>@localhost:5432/huddle_db
+   JWT_SECRET=<a long random string>
+   CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+```
+4. Run the migrations and seed the data:
 ```bash
-cd <YOUR_APP_NAME>
+   pipenv run alembic upgrade head
+   pipenv run python seed.py
 ```
-
-Finally, remove the existing `.git` information from this template:
-
+5. Start the server:
 ```bash
-rm -rf .git
+   pipenv run uvicorn main:app --reload
 ```
+6. Open http://127.0.0.1:8000/docs to try the routes. Seeded users all have the password `123` (`isa_aldaaysi`, `test1` to `test4`).
 
-> Removing the `.git` info is important as this is just a starter template provided gere. You do not need the existing git history for this project.
+## Next Steps
 
-## GitHub setup
-
-To add this project to GitHub, initialize a new Git repository:
-
-```bash
-git init
-git add .
-git commit -m "init commit"
-```
-
-Make a new repository on [GitHub](https://github.com/) named `<YOUR_PROJECT_NAME>`.
-
-Link your local project to your remote GitHub repo:
-
-```bash
-git remote add origin https://github.com/<github-username>/<YOUR_PROJECT_NAME>.git
-git push origin main
-```
-
-> 🚨 Do not copy the above command. It will not work. Your GitHub username will replace `<github-username>` (including the `<` and `>`) in the URL above.
-
-Open the project's folder in your code editor:
-
-```bash
-code .
-```
-
-1. Install dependencies (this also creates the virtual environment if it doesn’t exist):
-
-```sh
- pipenv install
-```
-
-1. Activate the virtual environment:
-
-```sh
- pipenv shell
-```
-
-1. Set up your PostgreSQL database:
-
-   - Ensure PostgreSQL is installed and running on your machine.
-   - Create a database named `teas_db` if it does not already exist:
-
-```bash
-createdb YOUR_APP_DB
-```
-
-1. Open the application in Visual Studio Code:
-
-```bash
-code .
-```
-
-1. The database connection string is defined in the `config/environment.py` file which uses environment variables:
-   > use the .env.example and either create a new `.env` file or just remove the .example part in the root of your project and add the below variables
-
-```python
-DATABASE_URL=postgresql+psycopg2://<username>@localhost:5432/<YOUR_APP_DB>
-JWT_SECRET=YOUR_SECRET_KEY
-```
-
-> _Modify your database connection string to use your username as the `<username>`._
-
-1. Seed the database with initial data:
-
-   - Run the `seed.py` file to reset the database by dropping existing tables and repopulating it with starter data:
-
-```bash
-pipenv run python seed.py
-```
-
-> You should see output indicating the database was successfully seeded. If there are any errors, check the `db_URI` in the `config/environment.py` file.
-
-1. Start the development server:
-
-```bash
-pipenv run uvicorn main:app --reload
-```
-
-> You should now have the app running. Visit [`http://127.0.0.1:8000`](http://127.0.0.1:8000) in your browser to confirm it’s working.
-
- 1. Now you can test each endpoint using FastAPI’s built-in documentation.
-
-> Navigate to FastAPI Documentation: Open [`http://localhost:8000/docs`](http://localhost:8000/docs) in your browser.
-
-<br>
-
-### Troubleshooting PostgreSQL
-
-- The database connection string is defined in the `config/environment.py` file:
-
-  ```python
-  DATABASE_URL = "postgresql+psycopg2://<username>@localhost:5432/teas_db"
-  ```
-
-- Ensure your PostgreSQL instance is configured to allow connections with the provided credentials.
-- **_Modify your database connection string to use your username as the `<username>`._**
-
-#### Setting Up a User in PostgreSQL
-
-To connect to a specific PostgreSQL user, use the following command:
-
-```sh
-psql -U <username>
-```
-
-#### Handling "Role Does Not Exist" Error
-
-If you see this error:
-
-```sh
-Error: FATAL: role "<username>" does not exist
-```
-
-it means that the specified user does not exist in PostgreSQL.
-
-#### Creating a New PostgreSQL User
-
-To create the user, run the following command inside `psql`:
-
-```sql
-CREATE ROLE "<username>" WITH LOGIN PASSWORD 'your_secure_password';
-```
-
-> 🔹 **Replace** `<username>` with your desired username and **choose a secure password**.
-
-This will allow you to connect using one of the following database connection strings:
-
-#### Connection Strings
-
-If **no password is required**:
-
-```python
-DATABASE_URL = "postgresql+psycopg2://<username>@localhost:5432/YOUR_APP_DB"
-```
-
-If **a password is required**:
-
-```python
-DATABASE_URL = "postgresql+psycopg2://<username>:<your_secure_password>@localhost:5432/YOUR_APP_DB"
-```
-
-This ensures that PostgreSQL correctly authenticates and allows access to the `YOUR_APP_DB` database.
+- Event categories (sports, study, gaming) with filters
+- Search events by area
+- Waitlist when an event is full
+- Event images
