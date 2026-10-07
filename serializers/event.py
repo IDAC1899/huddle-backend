@@ -1,7 +1,7 @@
 # serializers/event.py
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from .user import UserPublicSchema
 from .rsvp import RsvpSchema
@@ -14,6 +14,7 @@ class EventSchema(BaseModel):
   area: str
   starts_at: datetime
   capacity: int
+  image: Optional[str] = None
   # the user hosting the event
   user: UserPublicSchema
   rsvps: List[RsvpSchema] = []
@@ -28,6 +29,7 @@ class CreateEventSchema(BaseModel):
   area: str
   starts_at: datetime
   capacity: int
+  image: Optional[str] = None
 
 class UpdateEventSchema(BaseModel):
   title: str
@@ -35,6 +37,7 @@ class UpdateEventSchema(BaseModel):
   area: str
   starts_at: datetime
   capacity: int
+  image: Optional[str] = None
 
 # events the signed in user is hosting and going to
 class MyEventsSchema(BaseModel):

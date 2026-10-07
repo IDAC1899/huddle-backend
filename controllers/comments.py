@@ -68,6 +68,7 @@ def update_comment(comment_id: int, comment: UpdateCommentSchema, db: Session = 
         raise HTTPException(status_code=403, detail="Operation forbidden")
 
     comment_in_database.content = comment.content
+    comment_in_database.image = comment.image
 
     db.commit()
     db.refresh(comment_in_database)

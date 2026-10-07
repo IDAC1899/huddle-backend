@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import sessionmaker
 from data.user_data import user_list
-from data.event_data import events_list, rsvps_list, comments_list
+from data.event_data import events_list, rsvps_list, comments_list, likes_list
 from config.environment import DATABASE_URL
 from sqlalchemy import create_engine
 from models.base import Base
@@ -33,6 +33,10 @@ try:
     db.commit()
 
     db.add_all(comments_list)
+    db.commit()
+
+    # likes last, they belong to a comment
+    db.add_all(likes_list)
     db.commit()
 
     db.close()

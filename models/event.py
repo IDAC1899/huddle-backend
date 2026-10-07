@@ -1,5 +1,5 @@
 # models/event.py
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 
@@ -13,6 +13,8 @@ class EventModel(BaseModel):
     area = Column(String, nullable=False)
     starts_at = Column(DateTime, nullable=False)
     capacity = Column(Integer, nullable=False)
+    # optional header photo, saved as an image link or the image's data from the front end
+    image = Column(Text, nullable=True)
 
     # the user who is hosting the event
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
