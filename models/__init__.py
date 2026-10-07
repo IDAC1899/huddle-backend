@@ -5,5 +5,6 @@ from . import user
 from . import event
 from . import rsvp
 from . import comment
+from . import like
 
 __all__ = ["BaseModel"]
